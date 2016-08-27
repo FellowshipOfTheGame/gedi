@@ -1,0 +1,10 @@
+name: oi
+author: gilzoide
+short_desc: teste =P
+description: |
+    Esse pacote é um teste, porque testes são importantes
+    Saiba disso, meu jovem
+version: 0.0.1
+dependencies:
+- python: '>2'
+- random: '=42'
