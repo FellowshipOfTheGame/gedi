@@ -1,0 +1,10 @@
+hell.outdir = 'build'
+cpp {
+	input = 'main.cpp',
+	flags = '-Wall -g',
+	links = 'libzmq'
+}
+
+exclusiveTarget ('run', command {
+	command = 'build/main'
+})

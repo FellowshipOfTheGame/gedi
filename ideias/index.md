@@ -39,3 +39,15 @@ Performance
 Chamadas de procedimento remoto (RPC) são mais demoradas e imprevisíveis. Pra
 que o __Gedi__ funcione, algum paranauê vai ter que rolar pra não ficar muito
 lento, talvez assincronia e talz.
+
+
+Segurança
+---------
+Comunicação por sockets podem ser interceptadas e talz. Criar segurança nisso
+talvez deixe as coisas muito lentas, o que é ruim pra jogos. Como a maioria das
+comunicações serão locais, ou provavelmente LANs, acho que é de boa não fazer.
+
+
+API
+---
+Leia sobre a até então pensada [API](ideias/api.md)
