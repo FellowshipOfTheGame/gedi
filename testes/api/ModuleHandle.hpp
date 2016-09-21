@@ -4,14 +4,19 @@
 #include <iostream>
 #include <tuple>
 #include <zmq.hpp>
+#include <cstring>
 
 using namespace std;
 using namespace zmq;
 
 using BuffNSize = pair<void *, size_t>;
 
+BuffNSize getBuffer (const char * const & str) {
+	return make_pair ((void *) str, strlen (str));
+}
+
 BuffNSize getBuffer (const string & str) {
-	return make_pair ((void *) str.c_str (), str.size ());
+	return make_pair ((void *) str.data (), str.size ());
 }
 
 BuffNSize getBuffer (const double & x) {
@@ -30,7 +35,7 @@ BuffNSize getBuffer (const pair<size_t, T *> & P) {
 class ModuleHandle {
 public:
 	/// Ctor, com contexto zmq, endereço de conexão e 
-	ModuleHandle (context_t & ctx, string endereco) : skt (ctx, ZMQ_DEALER) {
+	ModuleHandle (context_t & ctx, const string & endereco) : skt (ctx, ZMQ_DEALER) {
 		skt.connect (endereco);
 	}
 

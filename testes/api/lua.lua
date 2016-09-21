@@ -9,8 +9,7 @@ local skt = assert (ctx:socket { zmq.ROUTER, bind = endereco })
 
 msgs = skt:recv_all ()
 msgs[3] = string.unpack ('i', msgs[3])
-msgs[4] = string.unpack ('d', msgs[4])
-msgs[5] = string.unpack ('i', msgs[5])
+msgs[4] = string.unpack ('i', msgs[4])
 for i, pedaco in ipairs (msgs) do print (i, pedaco) end
 
 skt:close ()

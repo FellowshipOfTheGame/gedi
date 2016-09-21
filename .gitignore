@@ -4,3 +4,4 @@
 
 # arquivos objeto
 *.o
+build/

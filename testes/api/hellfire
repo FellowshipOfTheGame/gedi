@@ -1,8 +1,9 @@
 hell.outdir = 'build'
 cpp {
-	input = 'main.cpp',
+	input = { 'main.cpp', 'grafico.cpp' },
 	flags = '-Wall -g',
-	links = 'libzmq'
+	links = { 'libzmq', 'sfml-all' },
+	multinput = true
 }
 
 exclusiveTarget ('run', command {

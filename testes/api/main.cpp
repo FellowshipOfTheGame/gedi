@@ -2,6 +2,7 @@
 #include "ModuleManager.hpp"
 
 #include <iostream>
+#include <thread>
 using namespace std;
 
 /// classe pra testar os template maluco
@@ -18,8 +19,9 @@ BuffNSize getBuffer (const Oi & o) {
 int main () {
 	ModuleManager mgr;
 	auto & h = mgr.addConnection ("grafico", "ipc://teste");
-	h ("oi", 1, 3.5123, Oi {5});
-	h ("colé");
+	h ("window", 800, 600, "Minha janela pocoto");
+	this_thread::sleep_for (5s);
+	h ("quit");
 
 	return 0;
 }
