@@ -55,6 +55,14 @@ public:
 		auto & msg = args.at (idx);
 		return (int) *msg.data<int> ();
 	}
+	int defaultInt (int idx, int I) {
+		try {
+			return asInt (idx);
+		}
+		catch (...) {
+			return I;
+		}
+	}
 
 	size_t size () {
 		return args.size ();

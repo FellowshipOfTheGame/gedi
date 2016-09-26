@@ -18,10 +18,14 @@ BuffNSize getBuffer (const Oi & o) {
 
 int main () {
 	ModuleManager mgr;
-	auto & h = mgr.addConnection ("grafico", "ipc://teste");
-	h ("window", 800, 600, "Minha janela pocoto");
+	mgr.readConfig ("gedimods.yml");
+	// auto h = mgr.addConnection ("grafico", "ipc://teste");
+	auto gfx = mgr.get ("grafico");
+	gfx ("window", 800, 600, "Minha janela pocoto");
+	gfx ("circle", 0, 200);
+	gfx ("draw");
 	this_thread::sleep_for (5s);
-	h ("quit");
+	gfx ("quit");
 
 	return 0;
 }

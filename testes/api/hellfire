@@ -1,8 +1,10 @@
 hell.outdir = 'build'
+
 cpp {
 	input = { 'main.cpp', 'grafico.cpp' },
 	flags = '-Wall -g',
-	links = { 'libzmq', 'sfml-all' },
+	includes = 'glib-2.0',
+	links = { 'libzmq', 'sfml-all', 'yaml-cpp', 'glib-2.0' },
 	multinput = true
 }
 

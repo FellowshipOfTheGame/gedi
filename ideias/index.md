@@ -50,4 +50,4 @@ comunicações serão locais, ou provavelmente LANs, acho que é de boa não faz
 
 API
 ---
-Leia sobre a até então pensada [API](ideias/api.md)
+Leia sobre a até então pensada [API](api.md)

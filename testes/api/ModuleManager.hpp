@@ -5,6 +5,7 @@
 #include <utility>
 #include <unordered_map>
 #include <zmq.hpp>
+#include <yaml-cpp/yaml.h>
 
 using namespace zmq;
 using namespace std;
@@ -15,23 +16,48 @@ public:
 	ModuleManager () {}
 
 	/// Dtor
-	~ModuleManager () {}
+	~ModuleManager () {
+		for (auto & con : modulos) {
+			delete con.second;
+		}
+	}
+
+	void readConfig (const string & fname) {
+		auto config = YAML::LoadFile (fname);
+		for (auto mod : config) {
+			auto nome = mod.first.as<string> ();
+			cout << "Achei módulo: " << nome << endl;
+			auto opts = mod.second;
+			auto endereco = opts["endereco"].as<string> ();
+			if (opts["spawn"]) {
+				spawnConnection (nome, endereco, opts["spawn"].as<string> ());
+			}
+			else {
+				addConnection (nome, endereco);
+			}
+		}
+	}
 
 	/// Adiciona uma conexão com módulo
-	ModuleHandle & addConnection (const string & nome, const string & conexao) {
-		auto it = modulos.emplace (piecewise_construct
-				, forward_as_tuple (nome)
-				, forward_as_tuple (ctx, conexao)).first;
-		return it->second;
+	ModuleHandle addConnection (const string & nome, const string & conexao) {
+		auto it = modulos.emplace (nome, new ModuleConnection (ctx, conexao)).first;
+		return move (ModuleHandle (it->second));
+	}
+
+	/// Spawna uma conexão com módulo
+	ModuleHandle spawnConnection (const string & nome, const string & conexao
+			, const string & comando) {
+		auto it = modulos.emplace (nome, new ModuleConnectionProcess (ctx, conexao, comando)).first;
+		return move (ModuleHandle (it->second));
 	}
 
 	/// Pega módulo referente ao nome dado, nullptr se não existir
-	ModuleHandle & get (const string & nome) {
+	ModuleHandle get (const string & nome) {
 		auto it = modulos.find (nome);
 		if (it == modulos.end ()) {
 			throw "Não achei módulo com tal nome =/";
 		}
-		return it->second;
+		return move (ModuleHandle (it->second));
 	}
 
 private:
@@ -39,5 +65,5 @@ private:
 	context_t ctx;
 
 	/// Mapa dos módulos
-	unordered_map<string, ModuleHandle> modulos;
+	unordered_map<string, ModuleConnection *> modulos;
 };
