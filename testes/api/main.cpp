@@ -5,6 +5,8 @@
 #include <thread>
 using namespace std;
 
+constexpr int raio = 100;
+
 /// classe pra testar os template maluco
 struct Oi {
 	int x;
@@ -22,9 +24,16 @@ int main () {
 	// auto h = mgr.addConnection ("grafico", "ipc://teste");
 	auto gfx = mgr.get ("grafico");
 	gfx ("window", 800, 600, "Minha janela pocoto");
-	gfx ("circle", 0, 200);
-	gfx ("draw");
-	this_thread::sleep_for (5s);
+	gfx ("circle", 0, raio);
+	gfx ("setOrigin", 0, raio, raio);
+	gfx ("circle", 1, raio / 2);
+	gfx ("setFillColor", 0, "amarelo");
+
+	bool fechou = false;
+	while (!fechou) {
+		gfx ("draw");
+		fechou = gfx ("didClose").resp ().asBool (0);
+	}
 	gfx ("quit");
 
 	return 0;

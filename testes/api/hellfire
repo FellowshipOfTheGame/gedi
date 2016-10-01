@@ -4,7 +4,7 @@ cpp {
 	input = { 'main.cpp', 'grafico.cpp' },
 	flags = '-Wall -g',
 	includes = 'glib-2.0',
-	links = { 'libzmq', 'sfml-all', 'yaml-cpp', 'glib-2.0' },
+	links = { 'libzmq', 'sfml-all', 'yaml-cpp', 'glib-2.0', 'pthread' },
 	multinput = true
 }
 
