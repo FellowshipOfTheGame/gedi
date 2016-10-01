@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <tuple>
 #include <zmq.hpp>
 
@@ -25,6 +26,10 @@ BuffNSize getBuffer (const double & x) {
 
 BuffNSize getBuffer (const int & x) {
 	return make_pair ((void *) &x, sizeof (int));
+}
+
+BuffNSize getBuffer (const uintptr_t & x) {
+	return make_pair ((void *) &x, sizeof (uintptr_t));
 }
 
 template<typename T>

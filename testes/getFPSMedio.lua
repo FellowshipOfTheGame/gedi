@@ -8,6 +8,8 @@ for l in io.lines () do
 	if inc then
 		soma = soma + inc
 		n = n + 1
+	else
+		print (l)
 	end
 end
-print (n / soma)
+print ('FPS médio:', n / soma)

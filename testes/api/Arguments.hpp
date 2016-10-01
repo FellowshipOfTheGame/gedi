@@ -3,13 +3,30 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 #include <zmq.hpp>
 
 using namespace std;
 using namespace zmq;
 
+template<typename T>
+T fromMessage (message_t & msg);
+
+template<>
 string fromMessage (message_t & msg) {
 	return move (string (msg.data<char> (), msg.size ()));
+}
+template<>
+int fromMessage (message_t & msg) {
+	return (int) *msg.data<int> ();
+}
+template<>
+uintptr_t fromMessage (message_t & msg) {
+	return (uintptr_t) *msg.data<uintptr_t> ();
+}
+template<>
+bool fromMessage (message_t & msg) {
+	return (bool) *msg.data<bool> ();
 }
 
 class Arguments {
@@ -37,42 +54,27 @@ public:
 	}
 	/// Pega o comando
 	string getComando () {
-		return fromMessage (comando);
+		return fromMessage<string> (comando);
 	}
 	/// Pega o ID de quem mandou, como string mesmo
 	string getId () {
-		return fromMessage (id);
+		return fromMessage<string> (id);
 	}
-	/// Pega mensagem idx como uma string
-	string asString (int idx) {
+	/// Pega mensagem idx como um T
+	template<typename T>
+	T as (int idx) {
 		auto & msg = args.at (idx);
-		return fromMessage (msg);
+		return fromMessage<T> (msg);
 	}
-	string defaultString (int idx, const string & str) {
+	/// Pega a mensagem idx como um T. Se não tiver, torna o padrão
+	template<typename T>
+	T asDefault (int idx, const T & dflt) {
 		try {
-			return asString (idx);
+			return as<T> (idx);
 		}
 		catch (...) {
-			return str;
+			return dflt;
 		}
-	}
-	/// Pega mensagem idx como um int
-	int asInt (int idx) {
-		auto & msg = args.at (idx);
-		return (int) *msg.data<int> ();
-	}
-	int defaultInt (int idx, int I) {
-		try {
-			return asInt (idx);
-		}
-		catch (...) {
-			return I;
-		}
-	}
-	/// Pega mensagem idx como um bool
-	bool asBool (int idx) {
-		auto & msg = args.at (idx);
-		return (bool) *msg.data<bool> ();
 	}
 
 	size_t size () {

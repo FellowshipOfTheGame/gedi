@@ -1,12 +1,13 @@
 #include "Module.hpp"
+#include "GameObject.hpp"
 #include <map>
+#include <cstdint>
 #include <SFML/Graphics.hpp>
 
 using namespace std;
 using namespace zmq;
 
-
-using ObjMap = map<int, sf::Drawable *>;
+using ObjMap = map<ID, sf::Drawable *>;
 
 int main () {
 	context_t ctx;
@@ -20,30 +21,30 @@ int main () {
 		M.close ();
 	});
 	M.on ("window", [&] (Arguments & args) {
-		int width = args.asInt (0);
-		int height = args.asInt (1);
-		string title = args.defaultString (2, "Teste");
+		int width = args.as<int> (0);
+		int height = args.as<int> (1);
+		string title = args.asDefault<string> (2, "Teste");
 		window.create (sf::VideoMode (width, height), title);
 		window.display ();
 	});
 	M.on ("circle", [&] (Arguments & args) {
-		int id = args.asInt (0);
-		int raio = args.defaultInt (1, 100);
+		auto id = args.as<ID> (0);
+		int raio = args.asDefault<int> (1, 100);
 		auto circulo = new sf::CircleShape (raio);
 		objetos.insert (make_pair (id, circulo));
 	});
 	M.on ("setOrigin", [&] (Arguments & args) {
-		int id = args.asInt (0);
+		auto id = args.as<ID> (0);
 		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
-			int x = args.asInt (1);
-			int y = args.asInt (2);
+			int x = args.as<int> (1);
+			int y = args.as<int> (2);
 			obj->setOrigin (x, y);
 		}
 	});
 	M.on ("setFillColor", [&] (Arguments & args) {
-		int id = args.asInt (0);
+		auto id = args.as<ID> (0);
 		if (auto * obj = dynamic_cast<sf::Shape *> (objetos.at (id))) {
-			string cor = args.asString (1);
+			string cor = args.as<string> (1);
 			if (cor == "amarelo") {
 				obj->setFillColor (sf::Color::Yellow);
 			}

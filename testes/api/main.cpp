@@ -1,5 +1,6 @@
 #include "ModuleHandle.hpp"
 #include "ModuleManager.hpp"
+#include "GameObject.hpp"
 
 #include <iostream>
 #include <chrono>
@@ -27,17 +28,22 @@ int main () {
 	// auto h = mgr.addConnection ("grafico", "ipc://teste");
 	auto gfx = mgr.get ("grafico");
 	gfx ("window", 800, 600, "Minha janela pocoto");
-	gfx ("circle", 0, raio);
-	gfx ("setOrigin", 0, raio, raio);
-	gfx ("circle", 1, raio / 2);
-	gfx ("setFillColor", 1, "amarelo");
+
+	// primeiro círculo
+	GameObject primeiro;
+	gfx ("circle", primeiro, raio);
+	gfx ("setOrigin", primeiro, raio, raio);
+	// segundo círculo
+	GameObject segundo;
+	gfx ("circle", segundo, raio / 2);
+	gfx ("setFillColor", segundo, "amarelo");
 
 	bool fechou = false;
 	chrono::duration<double> timeDiff;
 	while (!fechou) {
 		inicio = chrono::system_clock::now ();
 		gfx ("draw");
-		fechou = gfx ("didClose").resp ().asBool (0);
+		fechou = gfx ("didClose").resp ().as<bool> (0);
 		// verifica o tempo
 		fim = chrono::system_clock::now ();
 		timeDiff = fim - inicio;
