@@ -8,19 +8,8 @@ using namespace std;
 
 constexpr int raio = 100;
 
-/// classe pra testar os template maluco
-struct Oi {
-	int x;
-	Oi (int x) : x (x) {}
-};
-// Pra podermos mandar Ois pros módulos, basta overloadar a função `getBuffer`,
-// lembrando que argumento seja const&
-BuffNSize getBuffer (const Oi & o) {
-	return make_pair ((void *) &o.x, sizeof (int));
-}
-
 int main () {
-	// conta os tempo de tudo!
+	// conta os tempo dos frames
 	chrono::time_point<chrono::system_clock> inicio, fim;
 
 	ModuleManager mgr;
@@ -31,17 +20,14 @@ int main () {
 
 	// primeiro círculo
 	GameObject primeiro;
-	gfx ("circle", primeiro, raio);
-	gfx ("setOrigin", primeiro, raio, raio);
-	// segundo círculo
-	GameObject segundo;
-	gfx ("circle", segundo, raio / 2);
-	gfx ("setFillColor", segundo, "amarelo");
+	gfx ("texture", "flango", "flango.png");
+	gfx ("sprite", primeiro, "flango");
 
 	bool fechou = false;
 	chrono::duration<double> timeDiff;
 	while (!fechou) {
 		inicio = chrono::system_clock::now ();
+		gfx ("move", primeiro, 0.1, 0.1);
 		gfx ("draw");
 		fechou = gfx ("didClose").resp ().as<bool> (0);
 		// verifica o tempo

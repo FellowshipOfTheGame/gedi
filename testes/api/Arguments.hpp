@@ -17,6 +17,10 @@ string fromMessage (message_t & msg) {
 	return move (string (msg.data<char> (), msg.size ()));
 }
 template<>
+double fromMessage (message_t & msg) {
+	return (double) *msg.data<double> ();
+}
+template<>
 int fromMessage (message_t & msg) {
 	return (int) *msg.data<int> ();
 }

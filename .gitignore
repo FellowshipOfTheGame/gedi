@@ -5,3 +5,6 @@
 # arquivos objeto
 *.o
 build/
+
+# documentação
+html/

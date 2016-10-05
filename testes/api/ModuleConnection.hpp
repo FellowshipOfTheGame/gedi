@@ -27,8 +27,8 @@ public:
 		conn.send (func);
 	}
 	/// Chamar operação com argumentos, transformando-os usando `getBuffer`
-	template<class...Args>
-	void call (const string & func, Args... args) {
+	template<typename ...Args>
+	void call (const string & func, const Args & ... args) {
 		conn.send (func, args...);
 	}
 

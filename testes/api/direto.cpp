@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <chrono>
-
 using namespace std;
 
 constexpr int raio = 100;
@@ -11,16 +10,16 @@ int main () {
 	chrono::time_point<chrono::system_clock> inicio, fim;
 
 	sf::RenderWindow window (sf::VideoMode (800, 600), "Minha janela pocoto");
-	sf::CircleShape primero (raio);
-	primero.setOrigin (raio, raio);
+	sf::Texture tex;
+	tex.loadFromFile ("flango.png");
 
-	sf::CircleShape segundo (raio / 2);
-	segundo.setFillColor (sf::Color::Yellow);
+	sf::Sprite objeto (tex);
 
 	chrono::duration<double> timeDiff;
 	while (window.isOpen ()) {
 		inicio = chrono::system_clock::now ();
 
+		objeto.move (0.1, 0.1);
 		sf::Event ev;
 		while (window.pollEvent (ev)) {
 			switch (ev.type) {
@@ -33,8 +32,8 @@ int main () {
 			}
 		}
 
-		window.draw (primero);
-		window.draw (segundo);
+		window.clear ();
+		window.draw (objeto);
 		window.display ();
 
 		fim = chrono::system_clock::now ();

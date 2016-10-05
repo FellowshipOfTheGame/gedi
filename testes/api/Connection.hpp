@@ -58,7 +58,7 @@ public:
 	/// Manda argumentos para o módulo, usando `getBuffer` pra mandar argumentos
 	// direitim
 	template<typename T, typename...Args>
-	void send (const T & head, Args... tail) {
+	void send (const T & head, const Args & ... tail) {
 		size_t size;
 		void * buf;
 

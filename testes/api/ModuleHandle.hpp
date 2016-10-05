@@ -12,8 +12,8 @@ class ModuleHandle {
 public:
 	ModuleHandle (ModuleConnection * con) : connection (con) {}
 
-	template<class...Args>
-	ModuleHandle & operator() (Args... args) {
+	template<typename ...Args>
+	ModuleHandle & operator() (const Args & ... args) {
 		connection->call (args...);
 		return *this;
 	}
