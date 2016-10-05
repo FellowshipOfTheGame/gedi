@@ -66,6 +66,21 @@ int main () {
 			obj->setPosition (x, y);
 		}
 	});
+	M.on ("setRotation", [&] (Arguments & args) {
+		auto id = args.as<ID> (0);
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+			double angulo = args.as<double> (1);
+			obj->setRotation (angulo);
+		}
+	});
+	M.on ("setScale", [&] (Arguments & args) {
+		auto id = args.as<ID> (0);
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+			double sx = args.as<double> (1);
+			double sy = args.as<double> (2);
+			obj->setScale (sx, sy);
+		}
+	});
 	M.on ("move", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
 		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
@@ -74,14 +89,19 @@ int main () {
 			obj->move (x, y);
 		}
 	});
-	//--  Shapes  --//
-	M.on ("setFillColor", [&] (Arguments & args) {
+	M.on ("rotate", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Shape *> (objetos.at (id))) {
-			string cor = args.as<string> (1);
-			if (cor == "amarelo") {
-				obj->setFillColor (sf::Color::Yellow);
-			}
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+			double angulo = args.as<double> (1);
+			obj->rotate (angulo);
+		}
+	});
+	M.on ("scale", [&] (Arguments & args) {
+		auto id = args.as<ID> (0);
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+			double sx = args.as<double> (1);
+			double sy = args.as<double> (2);
+			obj->scale (sx, sy);
 		}
 	});
 	//--  Controle  --//
