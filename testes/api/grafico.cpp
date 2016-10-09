@@ -2,14 +2,30 @@
 #include "GameObject.hpp"
 #include "Exception.hpp"
 #include <unordered_map>
+#include <utility>
 #include <cstdint>
 #include <SFML/Graphics.hpp>
 
 using namespace std;
 using namespace zmq;
 
-using ObjMap = unordered_map<ID, sf::Drawable *>;
+struct Ispraite {
+	sf::Drawable *drawable;
+	sf::Shader *shader {nullptr};
+
+	Ispraite (sf::Drawable *d) : drawable (d) {}
+	~Ispraite () {
+		delete drawable;
+	}
+
+	void draw (sf::RenderTarget & target) {
+		target.draw (*drawable, shader ? shader : sf::RenderStates::Default);
+	}
+};
+
+using ObjMap = unordered_map<ID, Ispraite *>;
 using TextureMap = unordered_map<string, sf::Texture>;
+using ShaderMap = unordered_map<string, sf::Shader *>;
 
 int main () {
 	context_t ctx;
@@ -17,6 +33,7 @@ int main () {
 	Module M (ctx, "ipc://teste");
 	ObjMap objetos;
 	TextureMap texturas;
+	ShaderMap shaders;
 
 	sf::RenderWindow window;
 	//--  Sai da janela  --//
@@ -47,12 +64,13 @@ int main () {
 		auto id = args.as<ID> (0);
 		auto nomeTextura = args.as<string> (1);
 		const auto & tex = texturas.at (nomeTextura);
-		objetos.insert (make_pair (id, new sf::Sprite (tex)));
+		auto sprite = new sf::Sprite (tex);
+		objetos.emplace (id, new Ispraite (sprite));
 	});
 	//--  Transformables  --//
 	M.on ("setOrigin", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			int x = args.as<int> (1);
 			int y = args.as<int> (2);
 			obj->setOrigin (x, y);
@@ -60,7 +78,7 @@ int main () {
 	});
 	M.on ("setPosition", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			double x = args.as<double> (1);
 			double y = args.as<double> (2);
 			obj->setPosition (x, y);
@@ -68,14 +86,14 @@ int main () {
 	});
 	M.on ("setRotation", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			double angulo = args.as<double> (1);
 			obj->setRotation (angulo);
 		}
 	});
 	M.on ("setScale", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			double sx = args.as<double> (1);
 			double sy = args.as<double> (2);
 			obj->setScale (sx, sy);
@@ -83,7 +101,7 @@ int main () {
 	});
 	M.on ("move", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			double x = args.as<double> (1);
 			double y = args.as<double> (2);
 			obj->move (x, y);
@@ -91,24 +109,56 @@ int main () {
 	});
 	M.on ("rotate", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			double angulo = args.as<double> (1);
 			obj->rotate (angulo);
 		}
 	});
 	M.on ("scale", [&] (Arguments & args) {
 		auto id = args.as<ID> (0);
-		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id))) {
+		if (auto * obj = dynamic_cast<sf::Transformable *> (objetos.at (id)->drawable)) {
 			double sx = args.as<double> (1);
 			double sy = args.as<double> (2);
 			obj->scale (sx, sy);
 		}
 	});
+	//--  Shaders  --//
+	M.on ("shader", [&] (Arguments & args) {
+		auto nome = args.as<string> (0);
+		auto arquivo1 = args.as<string> (1);
+		auto arquivo2 = args.as<string> (2);
+		auto *shader = new sf::Shader;
+		if (arquivo2 == "vertex") {
+			shader->loadFromFile (arquivo1, sf::Shader::Type::Vertex);
+		}
+		else if (arquivo2 == "fragment") {
+			shader->loadFromFile (arquivo1, sf::Shader::Type::Fragment);
+		}
+		else if (arquivo2 == "geometry") {
+			shader->loadFromFile (arquivo1, sf::Shader::Type::Geometry);
+		}
+		else if (args.size () > 3) {
+			shader->loadFromFile (arquivo1, arquivo2, args.as<string> (3));
+		}
+		else {
+			shader->loadFromFile (arquivo1, arquivo2);
+		}
+		shaders.emplace (move (nome), shader);
+	});
+	M.on ("attach", [&] (Arguments & args) {
+		auto id = args.as<ID> (0);
+		auto shader = args.as<string> (1);
+		objetos.at (id)->shader = shaders.at (shader);
+	});
+	M.on ("unattach", [&] (Arguments & args) {
+		auto id = args.as<ID> (0);
+		objetos.at (id)->shader = nullptr;
+	});
 	//--  Controle  --//
 	M.on ("draw", [&] (Arguments & args) {
 		window.clear ();
 		for (auto & it : objetos) {
-			window.draw (*it.second);
+			it.second->draw (window);
 		}
 		window.display ();
 	});
@@ -133,6 +183,9 @@ int main () {
 
 	// limpa os rolê
 	for (auto & it : objetos) {
+		delete it.second;
+	}
+	for (auto & it : shaders) {
 		delete it.second;
 	}
 }

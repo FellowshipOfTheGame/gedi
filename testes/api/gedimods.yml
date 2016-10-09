@@ -1,3 +1,7 @@
 grafico:
     endereco: ipc://teste
     spawn: build/grafico
+
+audio:
+    endereco: ipc://audio
+    spawn: build/audio
