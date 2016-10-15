@@ -3,5 +3,9 @@ grafico:
     spawn: build/grafico
 
 audio:
-    endereco: ipc://audio
-    spawn: build/audio
+    # endereco: ipc://audio
+    # spawn: build/audio
+    endereco: inproc://audio
+    thread:
+        lib: build/audio.so
+        open: abre

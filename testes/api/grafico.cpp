@@ -27,10 +27,17 @@ using ObjMap = unordered_map<ID, Ispraite *>;
 using TextureMap = unordered_map<string, sf::Texture>;
 using ShaderMap = unordered_map<string, sf::Shader *>;
 
+extern "C" void abre (context_t * ctx, const char * endereco);
+
 int main () {
 	context_t ctx;
+	abre (&ctx, "ipc://teste");
+	return 0;
+}
+
+extern "C" void abre (context_t * ctx, const char * endereco) {
 	// módulo do gráfico
-	Module M (ctx, "ipc://teste");
+	Module M (*ctx, endereco);
 	ObjMap objetos;
 	TextureMap texturas;
 	ShaderMap shaders;
@@ -40,6 +47,9 @@ int main () {
 	M.on ("quit", [&] (Arguments & args) {
 		window.close ();
 		M.close ();
+	});
+	M.on ("open", [&] (Arguments & args) {
+		M.sync ();
 	});
 	//--  Criação/instanciação  --//
 	M.on ("window", [&] (Arguments & args) {

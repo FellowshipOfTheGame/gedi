@@ -6,10 +6,12 @@
 #include "Arguments.hpp"
 #include <iostream>
 #include <tuple>
+#include <thread>
 #include <zmq.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <glib.h>
+#include <gmodule.h>
 
 using namespace std;
 using namespace zmq;
@@ -21,6 +23,8 @@ public:
 	ModuleConnection (context_t & ctx, const string & endereco) : conn (ctx, ZMQ_DEALER) {
 		conn.skt.connect (endereco);
 	}
+
+	virtual ~ModuleConnection () {}
 
 	/// Chamar operação sem argumentos
 	void call (const string & func) {
@@ -57,10 +61,44 @@ public:
 		free (cmd);
 	}
 
-	~ModuleConnectionProcess () {
+	virtual ~ModuleConnectionProcess () {
 		g_spawn_close_pid (pid);
 	}
 private:
 	/// PID do processo, usado pra fechá-lo depois
 	GPid pid;
+};
+
+/// Conexão com módulo que spawna um thread
+class ModuleConnectionThread : public ModuleConnection {
+	using gediopenFunc = void (*) (context_t *, const char *);
+public:
+	ModuleConnectionThread (context_t & ctx, const string & endereco
+			, const string & nomeLib, const string & simbolo) : ModuleConnection (ctx, endereco) {
+		lib = g_module_open (nomeLib.c_str (), G_MODULE_BIND_LAZY);
+		// tenta pegar a função lá
+		gediopenFunc openFunc;
+		if (!g_module_symbol (lib, simbolo.c_str (), (gpointer *) &openFunc)) {
+			auto ex = GEDI_API_EXCEPTION ("ModuleConnectionThread", g_module_error ());
+			g_module_close (lib);
+			throw ex;
+		}
+
+		T = thread (openFunc, &ctx, endereco.c_str ());
+	}
+
+	virtual ~ModuleConnectionThread () {
+		const char * nomeLib = g_module_name (lib);
+		cout << "Esperando módulo \"" << nomeLib << "\" terminar" << endl;
+		T.join ();
+		if (!g_module_close (lib)) {
+			g_warning ("%s: %s\n", nomeLib, g_module_error ());
+		}
+	}
+private:
+	/// Módulo do glib da lib dinâmica
+	GModule * lib;
+
+	/// Thread onde tá rodando
+	thread T;
 };

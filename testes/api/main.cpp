@@ -17,8 +17,8 @@ int main () {
 	mgr.readConfig ("gedimods.yml");
 
 	auto audio = mgr.get ("audio");
-	audio ("music", "fundo", "musica.ogg");
-	audio ("mplay", "fundo");
+	// audio ("music", "fundo", "musica.ogg");
+	// audio ("mplay", "fundo");
 	audio ("buffer", "shot", "shotgun.ogg");
 	audio ("sound", "shot", "shot");
 	audio ("splay", "shot");
@@ -51,8 +51,6 @@ int main () {
 		delta = timeDiff.count ();
 		cout << delta << endl;
 	}
-	gfx ("quit");
-	audio ("quit");
 
 	return 0;
 }

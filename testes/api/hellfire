@@ -1,13 +1,22 @@
 hell.outdir = 'build'
 
-cpp {
+meuCpp = {
 	bin = CXX,
-	input = { 'main.cpp', 'grafico.cpp', 'audio.cpp', 'direto.cpp' },
 	flags = '-Wall -g',
 	std = 'c++11',
 	includes = 'glib-2.0',
-	links = { 'libzmq', 'sfml-all', 'yaml-cpp', 'glib-2.0' },
+	links = { 'libzmq', 'sfml-all', 'yaml-cpp', 'glib-2.0', 'gmodule-2.0', 'pthread' },
+}
+
+cpp:extend (meuCpp) {
+	input = { 'main.cpp', 'grafico.cpp', 'audio.cpp', 'direto.cpp' },
 	multinput = true
+}
+
+cpp.shared:extend (meuCpp) {
+	input = 'audio.cpp',
+	flags = '&-fPIC',
+	prepare_input = false
 }
 
 exclusiveTarget ('run', command {

@@ -6,8 +6,14 @@
 
 using namespace zmq;
 
+struct Vazio {};
+const Vazio VAZIO;
+
 using BuffNSize = pair<void *, size_t>;
 
+BuffNSize getBuffer (const Vazio & v) {
+	return make_pair (nullptr, 0);
+}
 BuffNSize getBuffer (const bool & b) {
 	return make_pair ((void *) &b, 1);
 }
@@ -43,6 +49,10 @@ class Connection {
 public:
 	/// Ctor, com contexto e tipo do socket ZMQ
 	Connection (context_t & ctx, int type) : skt (ctx, type) {}
+
+	~Connection () {
+		skt.close ();
+	}
 
 	/// Caso base, mandando último argumento, sem mandar ZMQ_SNDMORE, fechando
 	// mensagem

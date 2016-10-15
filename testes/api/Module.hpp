@@ -18,8 +18,14 @@ using mapaComando = unordered_map<string, comando>;
 class Module {
 public:
 	/// Ctor
-	Module (context_t & ctx, const string & endereco) : conn (ctx, ZMQ_ROUTER), taberto (true) {
+	Module (context_t & ctx, const string & endereco) : conn (ctx, ZMQ_ROUTER)
+			, endereco (endereco), taberto (true) {
 		conn.skt.bind (endereco);
+	}
+
+	/// Dtor, manda mensagem confirmando que acabou sussa
+	~Module () {
+		sync ();
 	}
 	
 	/// Fecha módulo
@@ -41,9 +47,14 @@ public:
 		auto cmd = args.getComando ();
 		auto it = comandosConhecidos.find (cmd);
 		if (it == comandosConhecidos.end ()) {
-			throw runtime_error ("Comando \"" + cmd + "\" desconhecido!");
+			throw runtime_error ("[" + endereco + "] Comando \"" + cmd + "\" desconhecido!");
 		}
 		it->second (args);
+	}
+
+	/// Manda mensagem vazia, pra sincronização
+	void sync () {
+		conn.send (args.getId (), VAZIO);
 	}
 
 	template<typename...Args>
@@ -51,10 +62,12 @@ public:
 		conn.send (args.getId (), arguments...);
 	}
 
-	
+
 private:
 	/// O socket pra comunicar, sempre ROUTER
 	Connection conn;
+
+	string endereco;
 
 	/// Tá aberto o módulo?
 	bool taberto;

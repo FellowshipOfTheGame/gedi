@@ -10,14 +10,24 @@ using MusicMap = unordered_map<string, sf::Music *>;
 using SoundMap = unordered_map<string, sf::Sound>;
 using BufferMap = unordered_map<string, sf::SoundBuffer>;
 
+extern "C" void abre (context_t * ctx, const char * endereco);
+
 int main () {
 	context_t ctx;
+	abre (&ctx, "ipc://audio");
+	return 0;
+}
+
+extern "C" void abre (context_t * ctx, const char * endereco) {
 	// módulo do audio
-	Module M (ctx, "ipc://audio");
+	Module M (*ctx, endereco);
 	MusicMap musicas;
 	SoundMap sons;
 	BufferMap buffers;
 
+	M.on ("open", [&] (Arguments & args) {
+		M.sync ();
+	});
 	M.on ("quit", [&] (Arguments & args) {
 		M.close ();
 	});

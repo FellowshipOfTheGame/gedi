@@ -1,6 +1,8 @@
 /// Teste de um ModuleManager, que conecta com os módulos e talz
 #pragma once
 
+#include "ModuleConnection.hpp"
+#include "ModuleHandle.hpp"
 #include <iostream>
 #include <utility>
 #include <unordered_map>
@@ -17,8 +19,13 @@ public:
 
 	/// Dtor
 	~ModuleManager () {
-		for (auto & con : modulos) {
-			delete con.second;
+		ModuleHandle h;
+		for (auto & it : modulos) {
+			h.set (it.second);
+			cout << "Mandando quit pro \"" << it.first << '"' << endl;
+			h ("quit").resp ();
+			
+			delete it.second;
 		}
 	}
 
@@ -29,12 +36,20 @@ public:
 			cout << "Achei módulo: " << nome << endl;
 			auto opts = mod.second;
 			auto endereco = opts["endereco"].as<string> ();
+			ModuleHandle h;
 			if (opts["spawn"]) {
-				spawnConnection (nome, endereco, opts["spawn"].as<string> ());
+				h = spawnConnection (nome, endereco, opts["spawn"].as<string> ());
+			}
+			else if (opts["thread"]) {
+				auto no = opts["thread"];
+				h = threadedConnection (nome, endereco, no["lib"].as<string> ()
+						, no["open"].as<string> ());
 			}
 			else {
-				addConnection (nome, endereco);
+				h = addConnection (nome, endereco);
 			}
+			// sincroniza com o novo módulo
+			h ("open").sync ();
 		}
 	}
 
@@ -51,11 +66,18 @@ public:
 		return move (ModuleHandle (it->second));
 	}
 
+	ModuleHandle threadedConnection (const string & nome, const string & conexao
+			, const string & nomeLib, const string & simbolo) {
+		auto it = modulos.emplace (nome, new ModuleConnectionThread (ctx, conexao, nomeLib, simbolo)).first;
+		return move (ModuleHandle (it->second));
+	}
+
 	/// Pega módulo referente ao nome dado, nullptr se não existir
 	ModuleHandle get (const string & nome) {
 		auto it = modulos.find (nome);
 		if (it == modulos.end ()) {
-			throw "Não achei módulo com tal nome =/";
+			throw GEDI_API_EXCEPTION ("ModuleManager", "Não achei módulo de nome \""
+					+ nome + "\" =/");
 		}
 		return move (ModuleHandle (it->second));
 	}
