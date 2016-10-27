@@ -4,21 +4,26 @@ meuCpp = {
 	bin = CXX,
 	flags = '-Wall -g',
 	std = 'c++11',
-	includes = 'glib-2.0',
+	includes = { 'glib-2.0', '../src' },
 	links = { 'libzmq', 'sfml-all', 'yaml-cpp', 'glib-2.0', 'gmodule-2.0', 'pthread' },
 }
 
 cpp:extend (meuCpp) {
-	input = { 'main.cpp', 'grafico.cpp', 'audio.cpp', 'direto.cpp' },
-	multinput = true
+	input = utils.glob '*/*.cpp',
+	multinput = true,
 }
 
 cpp.shared:extend (meuCpp) {
-	input = 'audio.cpp',
+	input = 'audio/audio.cpp',
 	flags = '&-fPIC',
 	prepare_input = false
 }
 
+copy {
+	input = utils.glob 'joguim/*.{glsl,png,ogg,yml}',
+	multinput = true,
+}
+
 exclusiveTarget ('run', command {
-	command = 'build/main'
+	command = 'cd build && env GEDI_MODULE_PATH=.. ./main'
 })

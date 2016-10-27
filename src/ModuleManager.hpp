@@ -5,6 +5,7 @@
 #include "ModuleHandle.hpp"
 #include <iostream>
 #include <utility>
+#include <cstring>
 #include <unordered_map>
 #include <zmq.hpp>
 #include <yaml-cpp/yaml.h>
@@ -36,16 +37,30 @@ public:
 			cout << "Achei módulo: " << nome << endl;
 			auto opts = mod.second;
 			auto endereco = opts["endereco"].as<string> ();
+			// Tenta ler arquivo de config específico do módulo, que é melhor né
+			try {
+				ostringstream os;
+				if (const char *prefix = getenv ("GEDI_MODULE_PATH")) {
+					os << prefix << '/';
+				}
+				os << nome << '/' << nome << ".yml";
+				opts = YAML::LoadFile (os.str ());
+				cout << "\tUsando config específica do módulo" << endl;
+			} catch (...) {}
+			// e conecta
 			ModuleHandle h;
-			if (opts["spawn"]) {
-				h = spawnConnection (nome, endereco, opts["spawn"].as<string> ());
-			}
-			else if (opts["thread"]) {
+			if (strncmp (endereco.data (), "inproc", 6) == 0 && opts["thread"]) {
+				cout << "\tCriando novo thread pro módulo" << endl;
 				auto no = opts["thread"];
 				h = threadedConnection (nome, endereco, no["lib"].as<string> ()
 						, no["open"].as<string> ());
 			}
+			else if (strncmp (endereco.data (), "ipc", 3) == 0 || opts["spawn"]) {
+				cout << "\tRodando comando do módulo" << endl;
+				h = spawnConnection (nome, endereco, opts["spawn"].as<string> ());
+			}
 			else {
+				cout << "\tAguardando conexão" << endl;
 				h = addConnection (nome, endereco);
 			}
 			// sincroniza com o novo módulo

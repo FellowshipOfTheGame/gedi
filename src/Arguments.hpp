@@ -84,6 +84,7 @@ public:
 	size_t size () {
 		return args.size ();
 	}
+
 private:
 	message_t comando;
 	message_t id;

@@ -14,7 +14,7 @@ extern "C" void abre (context_t * ctx, const char * endereco);
 
 int main () {
 	context_t ctx;
-	abre (&ctx, "ipc://audio");
+	abre (&ctx, "ipc://gedi_audio");
 	return 0;
 }
 
@@ -51,6 +51,11 @@ extern "C" void abre (context_t * ctx, const char * endereco) {
 	M.on ("mpause", [&] (Arguments & args) {
 		auto nome = args.as<string> (0);
 		musicas.at (nome)->pause ();
+	});
+	M.on ("setLoop", [&] (Arguments & args) {
+		auto nome = args.as<string> (0);
+		auto loop = args.as<bool> (1);
+		musicas.at (nome)->setLoop (loop);
 	});
 	//--  Buffer pros sonzinhos  --//
 	M.on ("buffer", [&] (Arguments & args) {

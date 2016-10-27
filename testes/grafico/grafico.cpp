@@ -172,19 +172,22 @@ extern "C" void abre (context_t * ctx, const char * endereco) {
 		}
 		window.display ();
 	});
-	M.on ("didClose", [&] (Arguments & args) {
+	bool didClose = false; // bool que conta se fechou janela, pega no 'input' e checa no 'didClose'
+	M.on ("input", [&] (Arguments & args) {
 		static sf::Event ev;
 		while (window.pollEvent (ev)) {
 			switch (ev.type) {
 				case sf::Event::Closed:
-					M.respond (true);
+					didClose = true;
 					break;
 
 				default:
 					break;
 			}
 		}
-		M.respond (false);
+	});
+	M.on ("didClose", [&] (Arguments & args) {
+		M.respond (didClose);
 	});
 
 	while (M.isOpen ()) {

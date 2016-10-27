@@ -1,0 +1,6 @@
+grafico:
+    endereco: ipc://teste
+    spawn: ./grafico
+
+audio:
+    endereco: ipc://gedi_audio

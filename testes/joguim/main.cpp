@@ -17,8 +17,9 @@ int main () {
 	mgr.readConfig ("gedimods.yml");
 
 	auto audio = mgr.get ("audio");
-	// audio ("music", "fundo", "musica.ogg");
-	// audio ("mplay", "fundo");
+	audio ("music", "fundo", "musica.ogg");
+	audio ("setLoop", "fundo", true);
+	audio ("mplay", "fundo");
 	audio ("buffer", "shot", "shotgun.ogg");
 	audio ("sound", "shot", "shot");
 	audio ("splay", "shot");
@@ -30,8 +31,8 @@ int main () {
 	GameObject primeiro;
 	gfx ("texture", "flango", "flango.png");
 	gfx ("sprite", primeiro, "flango");
-	gfx ("shader", "meuShader", "f.glsl", "fragment");
-	gfx ("attach", primeiro, "meuShader");
+	// gfx ("shader", "meuShader", "f.glsl", "fragment");
+	// gfx ("attach", primeiro, "meuShader");
 	gfx ("move", primeiro, largura / 2, altura / 2);
 	gfx ("setOrigin", primeiro, 71, 105);
 
@@ -40,6 +41,7 @@ int main () {
 	double ang = 0, delta = 0;
 	while (!fechou) {
 		inicio = chrono::system_clock::now ();
+		gfx ("input");
 		double sc = 1.5 + sin (ang) / 2; ang += 0.001;
 		gfx ("setScale", primeiro, sc, sc);
 		gfx ("rotate", primeiro, 10 * delta);
